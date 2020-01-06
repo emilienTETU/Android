@@ -1,0 +1,38 @@
+package com.example.myapp.ui.adapter
+
+import android.bluetooth.BluetoothDevice
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.TextView
+
+import com.example.myapp.R
+import com.example.myapp.data.model.Device
+
+import java.util.ArrayList
+
+
+
+
+
+
+class DeviceAdapter(context: Context, maList: ArrayList<Device>) : ArrayAdapter<Device>(context, 0, maList) {
+
+    override fun getView(position: Int, view: View?, parent: ViewGroup): View {
+        var view = view
+        val monElement = getItem(position)
+
+        if (view == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false)
+        }
+
+        val tvTitle = view!!.findViewById<TextView>(R.id.text)
+
+        tvTitle.text = monElement!!.name
+
+        return view
+    }
+
+}

@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">myApp</string>
+    <string name="BoutonValide">Mauvais bouton !!</string>
+    <string name="Bouton1">Aide</string>
+    <string name="BoutonHttp">Http</string>
+    <string name="Bouton2">Scan</string>
+    <string name="bleScanResult">Error ble scan</string>
+    <string name="BoutonScan">Scan</string>
+    <string name="BoutonLed">Change etat led</string>
+    <string name="ButtonDeco">Deconnexion</string>
+    <string name="BoutonRefresh">Refresh</string>
+    <string name="BoutonEtat">Changer d\'Etat</string>
+</resources>
