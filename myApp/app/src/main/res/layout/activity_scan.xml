@@ -9,7 +9,7 @@
     <ListView
         android:id="@+id/rvList"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="@dimen/matchContraint"
         android:visibility="visible"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/buttonScan"
@@ -23,8 +23,8 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:textAlignment="center"
-        android:textSize="15dp"
-        android:layout_marginTop="50dp"
+        android:textSize="@dimen/sizeTextConnection"
+        android:layout_marginTop="@dimen/marginTextConnection"
         app:layout_constraintTop_toTopOf="parent">
     </TextView>
 
@@ -32,15 +32,15 @@
         android:id="@+id/buttonScan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/BoutonScan"
+        android:text="@string/boutonScan"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/buttonDeconnection">
     </Button>
 
     <ImageView
         android:id="@+id/ledOn"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="@dimen/imageLedWidth"
+        android:layout_height="@dimen/imageLedHeigth"
         android:visibility="gone"
         android:src="@drawable/ic_flash_on_24px"
         app:layout_constraintTop_toTopOf="parent"
@@ -50,8 +50,8 @@
 
     <ImageView
         android:id="@+id/ledOff"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="@dimen/imageLedWidth"
+        android:layout_height="@dimen/imageLedHeigth"
         android:visibility="gone"
         android:src="@drawable/ic_flash_off_24px"
         app:layout_constraintTop_toTopOf="parent"
@@ -63,7 +63,7 @@
         android:id="@+id/buttonLed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/BoutonLed"
+        android:text="@string/boutonLed"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/buttonDeconnection"
         >
@@ -73,7 +73,7 @@
         android:id="@+id/buttonDeconnection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ButtonDeco"
+        android:text="@string/buttonDeco"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         >

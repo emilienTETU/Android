@@ -51,21 +51,21 @@ class ScanActivity : AppCompatActivity() {
     private val deviceArrayList = ArrayList<Device>()
 
     // Filtre UUID
-    private val DEVICE_UUID = UUID.fromString("795090c7-420d-4048-a24e-18e60180e23c")
-    private val CHARACTERISTIC_TOGGLE_LED_UUID = UUID.fromString("59b6bf7f-44de-4184-81bd-a0e3b30c919b")
+    private val DEVICE_UUID = UUID.fromString(getString(R.string.deviceUUID))
+    private val CHARACTERISTIC_TOGGLE_LED_UUID = UUID.fromString(getString(R.string.characteristicToggleLedUUIS))
 
     private var selectedDevice: Device? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_page2)
+        setContentView(R.layout.activity_scan)
 
         //RecyclerView
         deviceAdapter = DeviceAdapter(this, deviceArrayList) //val deviceAdapter =  DeviceAdapter deviceAdapter
         val rvDevices = findViewById<ListView>(R.id.rvList)
 
         rvDevices.adapter = deviceAdapter
-        rvDevices.setClickable(true)
+        rvDevices.isClickable = true
         rvDevices.setOnItemClickListener { parent, view, position, id -> listClick(position) }
 
         findViewById<View>(R.id.buttonScan).setOnClickListener(this::scanClick)
@@ -73,10 +73,9 @@ class ScanActivity : AppCompatActivity() {
         findViewById<View>(R.id.buttonLed).setOnClickListener { l -> toggleLed() }
     }
 
-    companion object { //méthode static en java
-
+    //méthode static en kotlin -> Peut avoir qu'un companion par class
+    companion object {
         val CHARACTERISTIC_NOTIFY_STATE = UUID.fromString("d75167c8-e6f9-4f0b-b688-09d96e195f00")
-
         fun StartActivity(context: Context): Intent {
             return Intent(context, ScanActivity::class.java)
         }
@@ -114,13 +113,12 @@ class ScanActivity : AppCompatActivity() {
             // Filtre sur le scan
             // scanFilters.add(new ScanFilter.Builder().setServiceUuid(new ParcelUuid(DEVICE_UUID)).build()); // add service filters
 
-            bluetoothAdapter?.getBluetoothLeScanner()?.startScan(scanFilters, settings, bleLollipopScanCallback)
+            bluetoothAdapter?.bluetoothLeScanner?.startScan(scanFilters, settings, bleLollipopScanCallback)
         } else {
-            //bluetoothAdapter?.startLeScan(DEVICE_UUID, bleScanCallback)
+            // TODO : message erreur version téléphone
         }
     }
 
-    // À votre avis ?
     private val scanDevicesRunnable = {
         stopScan()
     }
@@ -130,20 +128,20 @@ class ScanActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             bluetoothAdapter?.bluetoothLeScanner?.startScan(bleLollipopScanCallback)
         } else {
-            //bluetoothAdapter?.stopLeScan(bleScanCallback)
+            // TODO : message erreur version téléphone
         }
-        isScanning = false;
+        isScanning = false
     }
 
     private val bleLollipopScanCallback = object : ScanCallback() {
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-            val bluetoothDevice = result.getDevice()
+            val bluetoothDevice = result.device
             if (bluetoothDevice.name != null) {
                 val device = Device(bluetoothDevice.name, bluetoothDevice)
                 if (!deviceArrayList.contains(device)) {
-                    deviceArrayList?.add(device)
+                    deviceArrayList.add(device)
                     if (deviceAdapter != null) {
                         deviceAdapter!!.notifyDataSetChanged()
                     }
@@ -153,6 +151,7 @@ class ScanActivity : AppCompatActivity() {
 
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
+            // TODO : gerer l'erreur
             Toast.makeText(this@ScanActivity, getString(R.string.bleScanResult), Toast.LENGTH_SHORT).show()
         }
     }
@@ -195,15 +194,15 @@ class ScanActivity : AppCompatActivity() {
 
     private fun listClick(position: Int) {
         var item = deviceAdapter?.getItem(position)
-        selectedDevice = item;
+        selectedDevice = item
         Log.i("TEST", "" + item!!.name)
-        LocalPreferences.getInstance(this).saveCurrentSelectedDevice(item!!.name);
-        connectToCurrentDevice();
+        LocalPreferences.getInstance(this).saveCurrentSelectedDevice(item.name)
+        connectToCurrentDevice()
     }
 
     private fun connectToCurrentDevice() {
         if (selectedDevice != null) {
-            Toast.makeText(this, "Connexion en cours…", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.connection), Toast.LENGTH_SHORT).show()
             currentBluetoothGatt = selectedDevice!!.bluetoothDevice.connectGatt(this, false, gattCallback)
         }
     }
@@ -212,7 +211,7 @@ class ScanActivity : AppCompatActivity() {
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             super.onServicesDiscovered(gatt, status)
             runOnUiThread {
-                Toast.makeText(this@ScanActivity, "Services discovered with success", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@ScanActivity, "Services discovered with success", Toast.LENGTH_SHORT).show()
                 setUiMode(true)
             }
         }
@@ -232,14 +231,10 @@ class ScanActivity : AppCompatActivity() {
             }
         }
 
-        override fun onCharacteristicWrite(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
-            super.onCharacteristicWrite(gatt, characteristic, status)
-        }
-
         override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
             super.onCharacteristicChanged(gatt,characteristic)
             runOnUiThread{
-                if (characteristic.getStringValue(0).equals("ON")){
+                if (characteristic.getStringValue(0).equals(getString(R.string.on))){
                     findViewById<ImageView>(R.id.ledOff).visibility = View.GONE
                     findViewById<ImageView>(R.id.ledOn).visibility = View.VISIBLE
                 }
@@ -263,7 +258,6 @@ class ScanActivity : AppCompatActivity() {
         findViewById<View>(R.id.buttonDeconnection).visibility = View.GONE
         // On affiche le bouton permettant de changer l'état de la led
         findViewById<View>(R.id.buttonLed).visibility = View.GONE
-
         findViewById<ImageView>(R.id.ledOff).visibility = View.GONE
         findViewById<ImageView>(R.id.ledOn).visibility = View.GONE
     }
@@ -287,10 +281,10 @@ class ScanActivity : AppCompatActivity() {
             // On cache le RecyclerView
             findViewById<View>(R.id.rvList).visibility = View.GONE
             // On affiche le TextView qui indique le device sur lequel on est connecté
-            val text: TextView = findViewById<TextView>(R.id.textConnection)
+            val text = findViewById<TextView>(R.id.textConnection)
             text.visibility = View.VISIBLE
             // On set la bonne valeur au TextView
-            text.setText("isConnected to " + selectedDevice!!.name)
+            text.text = "isConnected to " + selectedDevice!!.name
             // On affiche le bouton déconnexion
             findViewById<View>(R.id.buttonDeconnection).visibility = View.VISIBLE
             // On affiche le bouton permettant de changer l'état de la led
@@ -301,6 +295,7 @@ class ScanActivity : AppCompatActivity() {
             enableListenBleNotify()
         } else {
             // À vous de trouver les bonnes actions
+            // TODO : mieux gérer l'erreur
             Toast.makeText(this, "connection refused !! ", Toast.LENGTH_LONG).show()
         }
 
@@ -308,22 +303,25 @@ class ScanActivity : AppCompatActivity() {
 
     private fun toggleLed() {
         if (currentBluetoothGatt == null) {
+            // TODO : mieux gerer l'erreur
             Toast.makeText(this, "Non Connecté", Toast.LENGTH_SHORT).show()
             return
         }
 
         val service = currentBluetoothGatt!!.getService(DEVICE_UUID)
         if (service == null) {
+            // TODO : mieux gerer l'erreur
             Toast.makeText(this, "UUID Introuvable", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val toggleLed = service!!.getCharacteristic(CHARACTERISTIC_TOGGLE_LED_UUID)
+        val toggleLed = service.getCharacteristic(CHARACTERISTIC_TOGGLE_LED_UUID)
         toggleLed.setValue("1")
         currentBluetoothGatt!!.writeCharacteristic(toggleLed)
     }
 
     private fun enableListenBleNotify() {
+        //TODO : Meme chose
         if (currentBluetoothGatt == null) {
             Toast.makeText(this, "Non Connecté", Toast.LENGTH_SHORT).show()
             return
@@ -337,7 +335,7 @@ class ScanActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Activation des notifications BLE", Toast.LENGTH_SHORT).show()
         val notification =
-                service!!.getCharacteristic(CHARACTERISTIC_NOTIFY_STATE) // Indique que le GATT Client va écouter les notifications sur le charactérisque
+                service.getCharacteristic(CHARACTERISTIC_NOTIFY_STATE) // Indique que le GATT Client va écouter les notifications sur le charactérisque
         currentBluetoothGatt?.setCharacteristicNotification(notification, true)
     }
 

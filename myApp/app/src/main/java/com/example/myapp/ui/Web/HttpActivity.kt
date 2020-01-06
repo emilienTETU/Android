@@ -24,11 +24,9 @@ class HttpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_http)
 
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
         val currentSelectedDevice = LocalPreferences.getInstance(this).currentSelectedDevice
         if (currentSelectedDevice == null) {
-            Toast.makeText(this, "Aucun périphérique connu", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.unknowDevice), Toast.LENGTH_SHORT).show()
             finish()
         } else {
             ledStatus.setIdentifier(currentSelectedDevice)

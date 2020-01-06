@@ -29,8 +29,4 @@ class LedStatus {
     fun reverseStatus(): LedStatus {
         return setStatus(!status)
     }
-
-    fun clone(): LedStatus {
-        return LedStatus().setIdentifier(getIdentifier()).setStatus(getStatus())
-    }
 }

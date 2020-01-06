@@ -22,19 +22,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //Click sur les boutons
-        findViewById<View>(R.id.button).setOnClickListener { l -> showDialog() } //l = lamda
-        findViewById<View>(R.id.button2).setOnClickListener { l -> startActivity(ScanActivity.StartActivity(this)) }
+        findViewById<View>(R.id.buttonHelp).setOnClickListener { l -> showDialog() } //l = lamda
+        findViewById<View>(R.id.buttonScan).setOnClickListener { l -> startActivity(ScanActivity.StartActivity(this)) }
     }
 
     protected fun showDialog() {
         val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
-                .title("AIDE")
-                .content("Deux choix possibles : \n- Connexion par Bluetooth \n- Connexion par HTTP\n\n Cela vous a t-il aider ?")
-                .positiveText("OUI")
-                .negativeText("NON")
+                .title(getString(R.string.dialogHelpTitle))
+                .content(getString(R.string.dialogHelpContent))
+                .positiveText(getString(R.string.dialogHelpPositive))
+                .negativeText(getString(R.string.dialogHelpNegative))
                 .onNegative { a, b ->
                     showDialog()
-                    Toast.makeText(this, R.string.BoutonValide, Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, R.string.dialogHelpBoutonInvalide, Toast.LENGTH_LONG).show()
                 }
                 .show()
     }
@@ -42,14 +42,16 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Bouton d'action HTTP
-        val actionBtn = findViewById<Button>(R.id.buttonHttp)
+        val httpBtn = findViewById<Button>(R.id.buttonHttp)
+        // Récupération du Device selectionné
         val currentSelectedDevice = LocalPreferences.getInstance(this).currentSelectedDevice
-        Log.i("DEVICE",currentSelectedDevice)
+        // Si un device est déjà enregistré alors on active la bouton sinon il n'est pas actif
         if (currentSelectedDevice != null) {
-            actionBtn.setEnabled(true);
-            actionBtn.setOnClickListener { l -> startActivity(HttpActivity.StartActivity(this,"id"))}
+            httpBtn.isEnabled = true
+            httpBtn.setOnClickListener { l -> startActivity(HttpActivity.StartActivity(this,getString(R.string.id)))}
         } else {
-            actionBtn.setEnabled(false)
+            // TODO : POP up connexion a un device
+            httpBtn.isEnabled = false
         }
     }
 }

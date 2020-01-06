@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="refreshButtonWidth">40dp</dimen>
+    <dimen name="refreshButtonHeight">40dp</dimen>
+    <dimen name="matchContraint">0dp</dimen>
+    <dimen name="textHttpSize">15dp</dimen>
+    <dimen name="marginTextHttp">15dp</dimen>
+    <dimen name="imageLedWidth">300dp</dimen>
+    <dimen name="imageLedHeigth">300dp</dimen>
+    <dimen name="marginImageESEO">180dp</dimen>
+    <dimen name="sizeTextButtonHelp">10dp</dimen>
+    <dimen name="sizeTextButtonHttp">10dp</dimen>
+    <dimen name="sizeTextButtonScan">10dp</dimen>
+    <dimen name="sizeTextConnection">15dp</dimen>
+    <dimen name="marginTextConnection">50dp</dimen>
+    <dimen name="sizeTextRV">30dp</dimen>
+</resources>

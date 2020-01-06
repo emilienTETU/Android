@@ -1,13 +1,26 @@
 <resources>
-    <string name="app_name">myApp</string>
-    <string name="BoutonValide">Mauvais bouton !!</string>
-    <string name="Bouton1">Aide</string>
-    <string name="BoutonHttp">Http</string>
-    <string name="Bouton2">Scan</string>
+    <string name="app_name">Led Control</string>
+
+    <string name="dialogHelpBoutonInvalide">Mauvais bouton !!</string>
+    <string name="dialogHelpTitle">AIDE</string>
+    <string name="dialogHelpContent">"Deux choix possibles : \n- Connexion par Bluetooth \n- Connexion par HTTP\n\n Cela vous a t-il aider ?"</string>
+    <string name="dialogHelpPositive">OUI</string>
+    <string name="dialogHelpNegative">NON</string>
+
+    <string name="boutonHelp">Aide</string>
+    <string name="boutonHttp">Http</string>
+    <string name="buttonScan">Scan</string>
+    <string name="boutonScan">Scan</string>
+    <string name="boutonLed">Change etat led</string>
+    <string name="buttonDeco">Deconnexion</string>
+    <string name="boutonRefresh">Refresh</string>
+    <string name="boutonEtat">Changer d\'Etat</string>
+
     <string name="bleScanResult">Error ble scan</string>
-    <string name="BoutonScan">Scan</string>
-    <string name="BoutonLed">Change etat led</string>
-    <string name="ButtonDeco">Deconnexion</string>
-    <string name="BoutonRefresh">Refresh</string>
-    <string name="BoutonEtat">Changer d\'Etat</string>
+    <string name="id">id</string>
+    <string name="deviceUUID">\"795090c7-420d-4048-a24e-18e60180e23c\"</string>
+    <string name="characteristicToggleLedUUIS">\"59b6bf7f-44de-4184-81bd-a0e3b30c919b\"</string>
+    <string name="connection">\"Connexion en cours…\"</string>
+    <string name="on">\"ON\"</string>
+    <string name="unknowDevice">\"Aucun périphérique connu\"</string>
 </resources>
