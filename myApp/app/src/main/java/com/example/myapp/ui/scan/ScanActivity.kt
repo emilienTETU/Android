@@ -27,6 +27,7 @@ import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.afollestad.materialdialogs.MaterialDialog
 import com.example.myapp.data.LocalPreferences
 import java.util.*
 import kotlin.collections.ArrayList
@@ -51,8 +52,8 @@ class ScanActivity : AppCompatActivity() {
     private val deviceArrayList = ArrayList<Device>()
 
     // Filtre UUID
-    private val DEVICE_UUID = UUID.fromString(getString(R.string.deviceUUID))
-    private val CHARACTERISTIC_TOGGLE_LED_UUID = UUID.fromString(getString(R.string.characteristicToggleLedUUIS))
+    private val DEVICE_UUID = UUID.fromString("795090c7-420d-4048-a24e-18e60180e23c")
+    private val CHARACTERISTIC_TOGGLE_LED_UUID = UUID.fromString("59b6bf7f-44de-4184-81bd-a0e3b30c919b")
 
     private var selectedDevice: Device? = null
 
@@ -92,7 +93,7 @@ class ScanActivity : AppCompatActivity() {
         }
 
         if (bluetoothManager == null || !bluetoothAdapter?.isEnabled!!) { // bluetooth is off
-            startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BLE)
+            showDialogBluetooth()
         } else {
             scanNearbyDevices() // start scanning by default
         }
@@ -115,7 +116,7 @@ class ScanActivity : AppCompatActivity() {
 
             bluetoothAdapter?.bluetoothLeScanner?.startScan(scanFilters, settings, bleLollipopScanCallback)
         } else {
-            // TODO : message erreur version téléphone
+            showDialogAndroidVersion()
         }
     }
 
@@ -128,7 +129,7 @@ class ScanActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             bluetoothAdapter?.bluetoothLeScanner?.startScan(bleLollipopScanCallback)
         } else {
-            // TODO : message erreur version téléphone
+            showDialogAndroidVersion()
         }
         isScanning = false
     }
@@ -151,8 +152,9 @@ class ScanActivity : AppCompatActivity() {
 
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
-            // TODO : gerer l'erreur
-            Toast.makeText(this@ScanActivity, getString(R.string.bleScanResult), Toast.LENGTH_SHORT).show()
+            if (errorCode != 1) {
+                showDialogErrorScan(errorCode)
+            }
         }
     }
 
@@ -183,12 +185,12 @@ class ScanActivity : AppCompatActivity() {
             val network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
             if (!gps_enabled || !network_enabled) {
-                startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_ENABLED_LOCATION_CODE)
+                showDialogLocalisation()
             } else {
                 setupBLE()
             }
         } else {
-            startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_ENABLED_LOCATION_CODE)
+            showDialogLocalisation()
         }
     }
 
@@ -284,7 +286,7 @@ class ScanActivity : AppCompatActivity() {
             val text = findViewById<TextView>(R.id.textConnection)
             text.visibility = View.VISIBLE
             // On set la bonne valeur au TextView
-            text.text = "isConnected to " + selectedDevice!!.name
+            text.text = getString(R.string.connectedTo) + selectedDevice!!.name
             // On affiche le bouton déconnexion
             findViewById<View>(R.id.buttonDeconnection).visibility = View.VISIBLE
             // On affiche le bouton permettant de changer l'état de la led
@@ -294,24 +296,28 @@ class ScanActivity : AppCompatActivity() {
 
             enableListenBleNotify()
         } else {
-            // À vous de trouver les bonnes actions
-            // TODO : mieux gérer l'erreur
-            Toast.makeText(this, "connection refused !! ", Toast.LENGTH_LONG).show()
+            findViewById<View>(R.id.buttonScan).visibility = View.VISIBLE
+            // On cache le RecyclerView
+            findViewById<View>(R.id.rvList).visibility = View.VISIBLE
+            // On affiche le TextView qui indique le device sur lequel on est connecté
+            val text = findViewById<TextView>(R.id.textConnection)
+            text.visibility = View.GONE
+            findViewById<View>(R.id.buttonDeconnection).visibility = View.GONE
+            // On affiche le bouton permettant de changer l'état de la led
+            findViewById<View>(R.id.buttonLed).visibility = View.GONE
         }
 
     }
 
     private fun toggleLed() {
         if (currentBluetoothGatt == null) {
-            // TODO : mieux gerer l'erreur
-            Toast.makeText(this, "Non Connecté", Toast.LENGTH_SHORT).show()
+            //showDialogErrorConnection()
             return
         }
 
         val service = currentBluetoothGatt!!.getService(DEVICE_UUID)
         if (service == null) {
-            // TODO : mieux gerer l'erreur
-            Toast.makeText(this, "UUID Introuvable", Toast.LENGTH_SHORT).show()
+            showDialogUUIDUnkown()
             return
         }
 
@@ -321,25 +327,91 @@ class ScanActivity : AppCompatActivity() {
     }
 
     private fun enableListenBleNotify() {
-        //TODO : Meme chose
         if (currentBluetoothGatt == null) {
-            Toast.makeText(this, "Non Connecté", Toast.LENGTH_SHORT).show()
+            //showDialogErrorConnection()
             return
         }
 
         val service = currentBluetoothGatt?.getService(DEVICE_UUID)
         if (service == null) {
-            Toast.makeText(this, "UUID Introuvable", Toast.LENGTH_SHORT).show()
+            showDialogUUIDUnkown()
             return
         }
 
-        Toast.makeText(this, "Activation des notifications BLE", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.connected), Toast.LENGTH_SHORT).show()
         val notification =
                 service.getCharacteristic(CHARACTERISTIC_NOTIFY_STATE) // Indique que le GATT Client va écouter les notifications sur le charactérisque
         currentBluetoothGatt?.setCharacteristicNotification(notification, true)
     }
 
+    protected fun showDialogUUIDUnkown() {
+        val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
+                .title(getString(R.string.dialogScanUUIDTitle))
+                .content(getString(R.string.dialogScanUUIDContent))
+                .positiveText(getString(R.string.dialogScanUUIDPositive))
+                .show()
+    }
 
+    protected fun showDialogAndroidVersion() {
+        val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
+                .title(getString(R.string.dialogScanVersionTitle))
+                .content(getString(R.string.dialogScanVersionContent))
+                .positiveText(getString(R.string.dialogScanVersionPositive))
+                .show()
+    }
+
+    protected fun showDialogErrorScan(errorCode: Int) {
+        val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
+                .title(getString(R.string.dialogScanErrorScanTitle))
+                .content(""+errorCode)
+                .positiveText(getString(R.string.dialogScanErrorScanPositive))
+                .negativeText(getString(R.string.dialogScanErrorScanNegative))
+                .onNegative { a, b ->
+                    checkPermissions()
+                }
+                .show()
+    }
+
+    protected fun showDialogLocalisation() {
+        val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
+                .title(getString(R.string.dialogScanLocalisationTitle))
+                .content(getString(R.string.dialogScanLocalisationContent))
+                .positiveText(getString(R.string.dialogScanLocalisationPositive))
+                .negativeText(getString(R.string.dialogScanLocalisationNegative))
+                .onNegative { a, b ->
+                    showDialogLocalisationRefuse()
+                }
+                .onPositive { a, b ->
+                    startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_ENABLED_LOCATION_CODE)
+                }
+                .show()
+    }
+
+    protected fun showDialogLocalisationRefuse() {
+        val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
+                .title(getString(R.string.dialogScanLocalisationRefuseTitle))
+                .content(getString(R.string.dialogScanLocalisationRefuseContent))
+                .positiveText(getString(R.string.dialogScanLocalisationPositive))
+                .negativeText(getString(R.string.dialogScanLocalisationNegative))
+                .onNegative { a, b ->
+                   finish()
+                }
+                .onPositive { a, b ->
+                    startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_ENABLED_LOCATION_CODE)
+                }
+                .show()
+    }
+
+    protected fun showDialogBluetooth() {
+        val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
+                .title(getString(R.string.dialogScanBluetoothTitle))
+                .content(getString(R.string.dialogScanBluetoothContent))
+                .positiveText(getString(R.string.dialogScanBluetoothPositive))
+                .onPositive { a, b ->
+                    startActivityForResult(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BLE)
+                }
+                .show()
+    }
 }
 
 

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import com.afollestad.materialdialogs.MaterialDialog
 import com.example.myapp.R
 import com.example.myapp.remote.LedStatus
 import retrofit2.Call
@@ -35,7 +36,7 @@ class HttpActivity : AppCompatActivity() {
             val btnNetwork = findViewById<Button>(R.id.changeStateLed)
 
             val text: TextView = findViewById<TextView>(R.id.textConnection)
-            text.setText("isConnected to "+LocalPreferences.getInstance(this).currentSelectedDevice)
+            text.setText(getString(R.string.connectedTo)+LocalPreferences.getInstance(this).currentSelectedDevice)
 
             refresh.setOnClickListener({ l -> refreshLedState() })
             btnNetwork.setOnClickListener({ l -> toggleWithNetwork() })
@@ -48,19 +49,14 @@ class HttpActivity : AppCompatActivity() {
     }
 
     companion object { //méthode static en java
-        private val IDENTIFIANT_ID = "IDENTIFIANT_ID" //TODO : a quoi sert l'identifiant
+        private val IDENTIFIANT_ID = "IDENTIFIANT_ID"
 
         fun StartActivity(context: Context, identifiant:String): Intent {
             val intent = Intent(context, HttpActivity::class.java)
+            // passer un parametre entre activités
             intent.putExtra(IDENTIFIANT_ID,identifiant)
             return intent
         }
-    }
-
-    fun getIdentifiant(): String? {
-        //TODO : demander au prof
-        val b = Intent.getIntent(null).extras
-        return b?.getString(IDENTIFIANT_ID, null)
     }
 
     fun refreshLedState() {
@@ -85,7 +81,9 @@ class HttpActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<LedStatus>, t: Throwable) {
                 t.printStackTrace()
-                runOnUiThread { Toast.makeText(this@HttpActivity, "Erreur de connexion au serveur", Toast.LENGTH_SHORT).show() }
+                runOnUiThread {
+                    showDialogErrorConnection()
+                }
             }
         })
     }
@@ -114,8 +112,25 @@ class HttpActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<LedStatus>, t: Throwable) {
                 t.printStackTrace()
-                runOnUiThread { Toast.makeText(this@HttpActivity, "Erreur de connexion au serveur", Toast.LENGTH_SHORT).show() }
+                runOnUiThread {
+                    showDialogErrorConnection()
+                }
             }
         })
+    }
+
+    protected fun showDialogErrorConnection() {
+        val dialog = MaterialDialog.Builder(this)  //Création d'un dialog (pop-up)
+                .title(getString(R.string.dialogHttpTitle))
+                .content(getString(R.string.dialogHttpContent))
+                .positiveText(getString(R.string.dialogHttpPositive))
+                .negativeText(getString(R.string.dialogHttpNegative))
+                .onNegative { a, b ->
+                    finish()
+                }
+                .onPositive { a, b ->
+                    refreshLedState()
+                }
+                .show()
     }
 }
